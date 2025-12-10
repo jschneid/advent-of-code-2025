@@ -1,36 +1,32 @@
 def cephalopod_values_from_lines(lines)
-  operator_indexes = lines[-1].to_enum(:scan, /\S/).map { Regexp.last_match.begin(0) }
+  operator_line = lines[-1]
+  number_lines = lines[0..-2]
 
-  # We will build a set of cephalopod values, with size equal to the number of operators.
-  cephalopod_values = Array.new(operator_indexes.size) { [] }
+  operator_positions = find_operator_positions(operator_line)
+  column_ranges = build_column_ranges(operator_positions, operator_line.size)
 
-  operator_indexes << lines[0].size + 1
-
-  cephalopod_value_set_index = 0
-
-  # Each operator appears in the input in the first x-index of each column of values.
-  # Iterate over each column, as bounded by its start and end x-indexes.
-  operator_indexes.each_cons(2) do |operator_index, next_operator_index|
-    cephalopod_value_index = 0
-
-    # In the current column, iterate over each x-index in the column.
-    (operator_index..next_operator_index - 2).each do |x|
-      cephalopod_values[cephalopod_value_set_index][cephalopod_value_index] = ''
-
-      # At the current x-index, iterate over each line of number values from the input.
-      (0..lines.size - 2).each do |y|
-
-        # At this y,x position of the input, add the character to the cephalopod value
-        # for this x-index, in the set of cephalopod values for this column.
-        cephalopod_values[cephalopod_value_set_index][cephalopod_value_index] += lines[y][x]
-      end
-      cephalopod_value_index += 1
-    end
-    cephalopod_value_set_index += 1
+  column_ranges.map do |column_range|
+    extract_vertical_numbers(number_lines, column_range)
   end
+end
 
-  cephalopod_values.map do |cephalopod_value_set|
-    cephalopod_value_set.map(&:to_i)
+def find_operator_positions(operator_line)
+  operator_line.to_enum(:scan, /\S/).map { Regexp.last_match.begin(0) }
+end
+
+def build_column_ranges(operator_positions, line_width)
+  # Add a boundary past the end of the line to simplify range calculation
+  boundaries = operator_positions + [line_width + 1]
+
+  boundaries.each_cons(2).map do |start_pos, end_pos|
+    start_pos..(end_pos - 2)
+  end
+end
+
+def extract_vertical_numbers(number_lines, column_range)
+  # Read vertically down the column at each x-index in the column_range
+  column_range.map do |column_index|
+    number_lines.map { |line| line[column_index] }.join.to_i
   end
 end
 
