@@ -1,15 +1,22 @@
+def add_timelines(beam_timelines_at_position, position, existing_timelines_count)
+  beam_timelines_at_position[position] = beam_timelines_at_position.fetch(position, 0) + existing_timelines_count
+end
+
 lines = File.readlines('day-07/input.txt')
+
 beam_timelines_at_position = {}
-beam_timelines_at_position[lines[0].index('S')] = 1
+start_position = lines[0].index('S')
+beam_timelines_at_position[start_position] = 1
 
 lines[1..].each do |line|
   next_beam_timelines_at_position = {}
-  beam_timelines_at_position.each do |position, timelines|
+
+  beam_timelines_at_position.each do |position, timelines_count|
     if line[position] == '^'
-      next_beam_timelines_at_position.key?(position - 1) ? next_beam_timelines_at_position[position - 1] += timelines : next_beam_timelines_at_position[position - 1] = timelines
-      next_beam_timelines_at_position.key?(position + 1) ? next_beam_timelines_at_position[position + 1] += timelines : next_beam_timelines_at_position[position + 1] = timelines
+      add_timelines(next_beam_timelines_at_position, position - 1, timelines_count)
+      add_timelines(next_beam_timelines_at_position, position + 1, timelines_count)
     else
-      next_beam_timelines_at_position.key?(position) ? next_beam_timelines_at_position[position] += timelines : next_beam_timelines_at_position[position] = timelines
+      add_timelines(next_beam_timelines_at_position, position, timelines_count)
     end
   end
 
