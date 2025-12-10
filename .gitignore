@@ -60,3 +60,6 @@ build-iPhoneSimulator/
 
 # Advent of Code
 input.txt
+
+# Claude code
+.claude/settings.local.json
